@@ -15,6 +15,8 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.apache.commons.io.output.ThresholdingOutputStream;
+
 
 public class MailSenter { 
 
@@ -40,7 +42,7 @@ public class MailSenter {
 	 * @param hostName String 
 	 */
 	public void setSmtpHost(String hostName) { 
-		System.out.println("设置系统属性：mail.smtp.host = "+hostName); 
+		//System.out.println("设置系统属性：mail.smtp.host = "+hostName); 
 		if(props == null)
 			props = System.getProperties(); //获得系统属性对象 	
 		props.put("mail.smtp.host",hostName); //设置SMTP主机 
@@ -54,7 +56,7 @@ public class MailSenter {
 	public boolean createMimeMessage() 
 	{ 
 		try { 
-			System.out.println("准备获取邮件会话对象！"); 
+			//System.out.println("准备获取邮件会话对象！"); 
 			session = Session.getDefaultInstance(props,null); //获得邮件会话对象 
 		} 
 		catch(Exception e){ 
@@ -62,7 +64,7 @@ public class MailSenter {
 			return false; 
 		} 
 	
-		System.out.println("准备创建MIME邮件对象！"); 
+		//System.out.println("准备创建MIME邮件对象！"); 
 		try { 
 			mimeMsg = new MimeMessage(session); //创建MIME邮件对象 
 			mp = new MimeMultipart(); 
@@ -79,7 +81,7 @@ public class MailSenter {
 	 * @param need
 	 */
 	public void setNeedAuth(boolean need) { 
-		System.out.println("设置smtp身份认证：mail.smtp.auth = "+need); 
+		//System.out.println("设置smtp身份认证：mail.smtp.auth = "+need); 
 		if(props == null) props = System.getProperties(); 
 		if(need){ 
 			props.put("mail.smtp.auth","true"); 
@@ -106,7 +108,7 @@ public class MailSenter {
 	 * @return
 	 */
 	public boolean setSubject(String mailSubject) { 
-		System.out.println("设置邮件主题！"); 
+		//System.out.println("设置邮件主题！"); 
 		try{ 
 			mimeMsg.setSubject(mailSubject); 
 			return true; 
@@ -147,7 +149,7 @@ public class MailSenter {
 	 * @param from String 
 	 */ 
 	public boolean setFrom(String from) { 
-		System.out.println("设置发信人！"); 
+		//System.out.println("设置发信人！"); 
 		try{ 
 			mimeMsg.setFrom(new InternetAddress(from)); //设置发信人 
 			return true; 
@@ -234,8 +236,29 @@ public class MailSenter {
 	
 	public static void send(List<String> tos,String smtp,String from,String subject,String imagePath,String username,String password){  
 	    if (tos!=null && tos.size()>0) {
+	    	int count = 0;
 			for (String to : tos) {
 				MailSenter.sendImageMail(smtp, from, to, subject, imagePath, username, password);
+				count++;
+				//每发送200条就休眠3分钟，避免操作频繁
+				if (count>=200) {
+					try {
+						//睡眠3分钟
+						Thread.sleep(1000*60*3);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					count = 0;
+				}else{
+					try {
+						//睡眠3秒
+						Thread.sleep(1000*3);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 		}  
 	} 

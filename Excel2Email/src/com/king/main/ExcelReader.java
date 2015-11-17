@@ -43,6 +43,7 @@ public class ExcelReader {
 				String value = cell.getStringCellValue();
 				list.add(value);
 			}
+			workbook.close();
 			return list;
 			
 		} catch (IOException e) {
@@ -50,6 +51,19 @@ public class ExcelReader {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static void main(String[] args) {
+		List<String> list = null;
+		int sheetNum = 4;
+		for (int i = 0; i < sheetNum; i++) {
+			list = ExcelReader.getNum("resourse\\excel\\qqEmail.xls", i);
+			for (String string : list) {
+				System.out.println(string);
+			}
+			list = null;
+		}
+		
 	}
 
 
